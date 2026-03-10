@@ -5,47 +5,43 @@ variables:
 - group: aws-credentials
 
 pool:
-vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'
 
 stages:
 
 - stage: Test
-displayName: Run Tests
-jobs:
-- job: TestJob
-steps:
+  displayName: Run Tests
+  jobs:
+    - job: TestJob
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.10'
 
-- task: UsePythonVersion@0
-inputs:
-versionSpec: '3.10'
-
-- script: |
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-pytest
-displayName: Install dependencies and run tests
-
+        - script: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pytest
+          displayName: Install dependencies and run tests
 
 - stage: Deploy
-displayName: Upload to AWS S3
-dependsOn: Test
-condition: succeeded()
+  displayName: Upload to AWS S3
+  dependsOn: Test
+  condition: succeeded()
 
-jobs:
-- job: DeployJob
-steps:
+  jobs:
+    - job: DeployJob
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.10'
 
-- task: UsePythonVersion@0
-inputs:
-versionSpec: '3.10'
-
-- script: |
-python -m pip install boto3
-python src/upload_to_s3.py
-displayName: Upload file to S3
-
-env:
-AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-AWS_REGION: $(AWS_REGION)
-S3_BUCKET: $(S3_BUCKET)
+        - script: |
+            python -m pip install boto3
+            python src/upload_to_s3.py
+          displayName: Upload file to S3
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_REGION: $(AWS_REGION)
+            S3_BUCKET: $(S3_BUCKET)
