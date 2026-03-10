@@ -1,10 +1,8 @@
-
-Laura carolina Cañon bonilla <laura.canonbonilla@gmail.com>
-23:04 (hace 0 minutos)
-para laura.canon
-
 trigger:
 - main
+
+variables:
+- group: aws-credentials
 
 pool:
 vmImage: 'ubuntu-latest'
@@ -25,11 +23,11 @@ versionSpec: '3.10'
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 pytest
-displayName: Run pytest
+displayName: Install dependencies and run tests
 
 
 - stage: Deploy
-displayName: Upload to S3
+displayName: Upload to AWS S3
 dependsOn: Test
 condition: succeeded()
 
@@ -44,7 +42,7 @@ versionSpec: '3.10'
 - script: |
 python -m pip install boto3
 python src/upload_to_s3.py
-displayName: Upload file
+displayName: Upload file to S3
 
 env:
 AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
