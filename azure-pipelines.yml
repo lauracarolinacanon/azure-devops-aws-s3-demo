@@ -6,10 +6,10 @@ pool:
 
 steps:
   - script: python --version
-    displayName: Check Python installation
+    displayName: Check Python
 
-  - script: pip install -r requirements.txt
+  - script: python -m pip install -r requirements.txt
     displayName: Install dependencies
 
-  - script: pytest
+  - script: python -m pytest
     displayName: Run tests
