@@ -13,22 +13,22 @@ steps:
   # Instalar dependencias
   - script: |
       python -m pip install --upgrade pip
-      pip install -r requirements.txt
+      python -m pip install -r requirements.txt
     displayName: Install dependencies
 
   # Ejecutar tests
   - script: |
-      pytest
+      python -m pytest
     displayName: Run tests
 
-  # Configurar AWS CLI
+  # Configurar credenciales AWS
   - script: |
       aws configure set aws_access_key_id $(AWS_ACCESS_KEY_ID)
       aws configure set aws_secret_access_key $(AWS_SECRET_ACCESS_KEY)
       aws configure set default.region us-east-1
     displayName: Configure AWS
 
-  # Subir archivo al bucket
+  # Subir archivo a S3
   - script: |
       aws s3 cp data/input.txt s3://azure-devops-demo-bucket/data/input.txt
     displayName: Upload file to S3
