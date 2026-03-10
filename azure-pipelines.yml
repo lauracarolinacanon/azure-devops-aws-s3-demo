@@ -4,45 +4,12 @@ trigger:
 pool:
   name: default
 
-variables:
-- group: aws-credentials
+steps:
+  - script: python --version
+    displayName: Check Python installation
 
-stages:
+  - script: pip install -r requirements.txt
+    displayName: Install dependencies
 
-- stage: Test
-  displayName: Run Python Tests
-  jobs:
-    - job: TestJob
-      steps:
-        - task: UsePythonVersion@0
-          displayName: Use Python
-          inputs:
-            versionSpec: '3.10'
-
-        - script: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-          displayName: Install dependencies
-
-        - script: |
-            pytest
-          displayName: Run tests
-
-- stage: Deploy
-  displayName: Upload to S3
-  dependsOn: Test
-  condition: succeeded()
-  jobs:
-    - job: DeployJob
-      steps:
-        - script: |
-            pip install awscli
-          displayName: Install AWS CLI
-
-        - script: |
-            aws configure set aws_access_key_id $(AWS_ACCESS_KEY_ID)
-            aws configure set aws_secret_access_key $(AWS_SECRET_ACCESS_KEY)
-            aws configure set default.region $(AWS_DEFAULT_REGION)
-
-            aws s3 cp data/ s3://$(S3_BUCKET)/ --recursive
-          displayName: Upload files to S3
+  - script: pytest
+    displayName: Run tests
