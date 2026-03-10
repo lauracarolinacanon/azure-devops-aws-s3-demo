@@ -1,0 +1,47 @@
+trigger:
+- main
+
+pool:
+vmImage: "ubuntu-latest"
+
+variables:
+AWS_REGION: "us-east-1"
+S3_BUCKET: "azure-devops-demo-bucket"
+
+stages:
+
+- stage: Test
+jobs:
+- job: RunTests
+steps:
+
+- task: UsePythonVersion@0
+inputs:
+versionSpec: "3.10"
+
+- script: |
+pip install -r requirements.txt
+pytest
+displayName: "Run tests"
+
+
+- stage: Deploy
+dependsOn: Test
+jobs:
+- job: UploadS3
+steps:
+
+- task: UsePythonVersion@0
+inputs:
+versionSpec: "3.10"
+
+- script: |
+pip install -r requirements.txt
+python src/upload_to_s3.py
+displayName: "Upload to S3"
+
+env:
+AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+AWS_REGION: $(AWS_REGION)
+S3_BUCKET: $(S3_BUCKET)
