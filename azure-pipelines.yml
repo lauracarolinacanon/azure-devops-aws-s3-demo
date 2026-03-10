@@ -1,44 +1,49 @@
 trigger:
 - main
 
-pool:
-vmImage: "ubuntu-latest"
+pr:
+- main
 
-variables:
-AWS_REGION: "us-east-1"
-S3_BUCKET: "azure-devops-demo-bucket"
+pool:
+vmImage: 'ubuntu-latest'
 
 stages:
 
 - stage: Test
+displayName: Run Python Tests
 jobs:
-- job: RunTests
+- job: Test
 steps:
 
 - task: UsePythonVersion@0
 inputs:
-versionSpec: "3.10"
+versionSpec: '3.10'
 
 - script: |
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 pytest
-displayName: "Run tests"
+displayName: Install dependencies and run tests
 
 
 - stage: Deploy
+displayName: Upload file to AWS S3
 dependsOn: Test
+condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
 jobs:
-- job: UploadS3
+- job: Upload
 steps:
 
 - task: UsePythonVersion@0
 inputs:
-versionSpec: "3.10"
+versionSpec: '3.10'
 
 - script: |
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+pip install boto3
 python src/upload_to_s3.py
-displayName: "Upload to S3"
+displayName: Upload file to S3
 
 env:
 AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
